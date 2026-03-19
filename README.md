@@ -79,3 +79,5 @@ Returns the admin address.
 
 > ⚠️ Replace with your deployed contract address:
 CCZUUOVXLGOL3PEYCDQIXLXFNVL4JTYPYF2HXZ264JPVIIKVHMSNFDUW
+
+<img width="1680" height="1050" alt="Screenshot 2026-03-19 at 2 08 28 PM" src="https://github.com/user-attachments/assets/6c8e649e-af6e-4be3-a039-6baa98cb5c00" />
