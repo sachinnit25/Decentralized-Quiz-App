@@ -27,19 +27,26 @@ const HORIZON_URL = "https://horizon-testnet.stellar.org";
 const RPC_URL = "https://soroban-testnet.stellar.org"; 
 const server = new StellarSdk.Horizon.Server(HORIZON_URL);
 
+// Helper to ensure we have a string address
+const getAddressString = (val: any): string => {
+  if (typeof val === 'string') return val;
+  if (val && val.address) return val.address;
+  if (val && typeof val.toString === 'function') return val.toString();
+  return "";
+};
+
 /**
  * Connects to the Stellar wallet (Freighter).
- * Structured to be easily extensible for multi-wallet support.
  */
 export const connectWallet = async () => {
   try {
-    if (await freighter.isConnected()) {
-      const { address } = await freighter.getAddress();
-      if (address) return address;
-      throw new WalletError("Could not retrieve wallet address.");
-    } else {
-      throw new WalletError("Freighter wallet not found or not connected.");
+    if (!await freighter.isConnected()) {
+      throw new WalletError("Freighter wallet not found.");
     }
+    const res = await freighter.requestAccess();
+    const address = getAddressString(res);
+    if (address) return address;
+    throw new WalletError("User denied access or no account found.");
   } catch (error: any) {
     if (error instanceof WalletError) throw error;
     throw new WalletError(error.message || "Failed to connect wallet.");
@@ -48,7 +55,8 @@ export const connectWallet = async () => {
 
 export const getXLMBalance = async (publicKey: string) => {
   try {
-    const account = await server.loadAccount(publicKey);
+    const address = getAddressString(publicKey);
+    const account = await server.loadAccount(address);
     const nativeBalance = account.balances.find((b: any) => b.asset_type === "native");
     return nativeBalance ? nativeBalance.balance : "0";
   } catch (error) {
@@ -59,7 +67,6 @@ export const getXLMBalance = async (publicKey: string) => {
 
 /**
  * Invokes a function on a Soroban smart contract.
- * (Requirement 3: Contract called from the frontend)
  */
 export const invokeContract = async (
   contractId: string,
@@ -67,7 +74,8 @@ export const invokeContract = async (
   args: StellarSdk.xdr.ScVal[] = []
 ) => {
   try {
-    const { address: publicKey } = await freighter.getAddress();
+    const res = await freighter.requestAccess();
+    const publicKey = getAddressString(res);
     if (!publicKey) throw new WalletError("Wallet not connected.");
 
     const account = await server.loadAccount(publicKey);
@@ -96,15 +104,10 @@ export const invokeContract = async (
     });
 
     const signedXdr = typeof result === "string" ? result : (result as any).signedTxXdr;
-    if (!signedXdr) throw new TransactionError("Transaction signing failed or was rejected.");
+    if (!signedXdr) throw new TransactionError("Transaction signing failed.");
 
     const tx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, StellarSdk.Networks.TESTNET);
     const response = await server.submitTransaction(tx);
-    
-    if (!response.successful) {
-      throw new TransactionError("Transaction failed during submission.");
-    }
-
     return response;
   } catch (error: any) {
     if (error instanceof WalletError || error instanceof TransactionError) throw error;
@@ -113,36 +116,14 @@ export const invokeContract = async (
 };
 
 /**
- * Fetches contract events for real-time integration.
- * (Requirement 6: Real-time event integration)
- */
-export const getContractEvents = async (contractId: string) => {
-    try {
-        const rpc = new StellarSdk.rpc.Server(RPC_URL);
-        const latestLedger = await rpc.getLatestLedger();
-        const events = await rpc.getEvents({
-            startLedger: latestLedger.sequence - 100,
-            filters: [
-                {
-                    type: "contract",
-                    contractIds: [contractId]
-                }
-            ]
-        });
-        return events.events;
-    } catch (error) {
-        console.error("Error fetching events:", error);
-        return [];
-    }
-}
-
-/**
  * Sends a native XLM transaction on the Stellar Testnet.
- * (Requirement: Level 1 - Send an XLM transaction)
  */
 export const sendXLMTransaction = async (destination: string, amount: string) => {
   try {
-    const { address: publicKey } = await freighter.getAddress();
+    const res = await freighter.requestAccess();
+    const publicKey = getAddressString(res);
+    const destString = getAddressString(destination);
+    
     if (!publicKey) throw new WalletError("Wallet not connected.");
 
     const account = await server.loadAccount(publicKey);
@@ -153,7 +134,7 @@ export const sendXLMTransaction = async (destination: string, amount: string) =>
     })
       .addOperation(
         StellarSdk.Operation.payment({
-          destination: destination,
+          destination: destString,
           asset: StellarSdk.Asset.native(),
           amount: amount,
         })
@@ -170,11 +151,6 @@ export const sendXLMTransaction = async (destination: string, amount: string) =>
 
     const tx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, StellarSdk.Networks.TESTNET);
     const response = await server.submitTransaction(tx);
-    
-    if (!response.successful) {
-      throw new TransactionError("Transaction failed during submission.");
-    }
-
     return response;
   } catch (error: any) {
     if (error instanceof WalletError || error instanceof TransactionError) throw error;
