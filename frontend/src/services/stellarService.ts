@@ -136,4 +136,50 @@ export const getContractEvents = async (contractId: string) => {
     }
 }
 
+/**
+ * Sends a native XLM transaction on the Stellar Testnet.
+ * (Requirement: Level 1 - Send an XLM transaction)
+ */
+export const sendXLMTransaction = async (destination: string, amount: string) => {
+  try {
+    const { address: publicKey } = await freighter.getAddress();
+    if (!publicKey) throw new WalletError("Wallet not connected.");
+
+    const account = await server.loadAccount(publicKey);
+
+    const transaction = new StellarSdk.TransactionBuilder(account, {
+      fee: "1000",
+      networkPassphrase: StellarSdk.Networks.TESTNET,
+    })
+      .addOperation(
+        StellarSdk.Operation.payment({
+          destination: destination,
+          asset: StellarSdk.Asset.native(),
+          amount: amount,
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    const result = await freighter.signTransaction(transaction.toXDR(), {
+      networkPassphrase: StellarSdk.Networks.TESTNET,
+    });
+
+    const signedXdr = typeof result === "string" ? result : (result as any).signedTxXdr;
+    if (!signedXdr) throw new TransactionError("Transaction signing failed.");
+
+    const tx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, StellarSdk.Networks.TESTNET);
+    const response = await server.submitTransaction(tx);
+    
+    if (!response.successful) {
+      throw new TransactionError("Transaction failed during submission.");
+    }
+
+    return response;
+  } catch (error: any) {
+    if (error instanceof WalletError || error instanceof TransactionError) throw error;
+    throw new TransactionError(error.message || "XLM Transfer failed.");
+  }
+};
+
 export { server };

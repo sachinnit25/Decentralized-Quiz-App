@@ -6,6 +6,7 @@ import {
   getXLMBalance, 
   invokeContract, 
   getContractEvents,
+  sendXLMTransaction,
   WalletError,
   TransactionError,
   ContractError
@@ -73,6 +74,26 @@ function App() {
     setAddress(null);
     setBalance(null);
     setTxStatus({ type: 'idle', message: '' });
+  };
+
+  const handleTestTransfer = async () => {
+    if (!address) return;
+    try {
+      setTxStatus({ type: 'pending', message: 'Sending 0.1 XLM to yourself as a test...' });
+      const response = await sendXLMTransaction(address, "0.1");
+      setTxStatus({ 
+        type: 'success', 
+        message: 'Test transaction successful!',
+        hash: response.hash
+      });
+      fetchData();
+    } catch (error: any) {
+      if (error instanceof TransactionError) {
+        setTxStatus({ type: 'error', message: `Transfer Failed: ${error.message}` });
+      } else {
+        setTxStatus({ type: 'error', message: 'An unexpected error occurred.' });
+      }
+    }
   };
 
   const handleSubmitAnswer = async (quizIndex: number, answer: number) => {
@@ -205,6 +226,18 @@ function App() {
                     <div>
                         <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{balance ? Number(balance).toFixed(2) : '0.00'}</div>
                         <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>XLM Balance</div>
+                    </div>
+                    
+                    <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>LEVEL 1 TASKS</h4>
+                        <button 
+                            className="primary" 
+                            onClick={handleTestTransfer}
+                            style={{ width: '100%', fontSize: '0.8rem', padding: '0.6rem' }}
+                            disabled={txStatus.type === 'pending'}
+                        >
+                            Send Test Transaction (0.1 XLM)
+                        </button>
                     </div>
                 </div>
 

@@ -1,84 +1,29 @@
-# 🧠 Decentralized Quiz App (Soroban Smart Contract)
+# 🧠 Decentralized Quiz App (Stellar Soroban)
 
-## 📖 Project Description
+A premium, blockchain-powered quiz application built on **Stellar Soroban**. This app allows for trustless quiz creation, participation, and verifiable scoring.
 
-The Decentralized Quiz App is a blockchain-powered application built on Soroban (Stellar Smart Contracts) that enables users to participate in quizzes in a fully trustless and transparent environment.
+## 🌟 Level 1 Features (Implemented)
+- ✅ **Freighter Wallet Integration**: Secure connection to the Stellar network.
+- ✅ **Real-time XLM Balance**: Automatically fetches and displays your testnet balance.
+- ✅ **XLM Transaction Flow**: Integrated testing button to send payments with real-time on-chain feedback.
+- ✅ **Premium UI/UX**: Dark-themed, responsive design with smooth animations and state management.
 
-Unlike traditional quiz platforms, this system stores quiz data and user scores directly on-chain, ensuring immutability, fairness, and verifiability without relying on centralized servers.
+## 🛠️ Project Structure
+- `/contract/quiz-contract`: The Soroban smart contract (Rust).
+- `/frontend`: The React + Vite + TypeScript web application.
+- `deploy_contract.bat`: Automation script for building and deploying the contract.
 
----
+## 🚀 Quick Start
+1.  Navigate to `/frontend` and run `npm install`.
+2.  Start the dev server with `npm run dev`.
+3.  Connect your Freighter wallet (set to Testnet).
+4.  Use the "Send Test Transaction" button to verify Level 1 requirements.
 
-## ⚙️ What It Does
-
-- Allows an admin to create quizzes directly on the blockchain.
-- Enables users to attempt quizzes using their wallet address.
-- Automatically checks answers and updates scores.
-- Stores all quiz and scoring data securely and permanently.
-
----
-
-## 🚀 Features
-
-- 🧩 Fully decentralized quiz platform  
-- 🔐 Secure user authentication via wallet signatures  
-- 📊 Transparent scoring system  
-- 👤 User-specific performance tracking  
-- 📝 On-chain quiz storage  
-- ⚡ Lightweight and efficient Soroban smart contract  
-- 🛡️ Tamper-proof records  
+## 📝 Smart Contract Functions
+- `initialize(admin: Address)`: Set up the contract admin.
+- `create_quiz(question, options, correct_answer)`: Admin only.
+- `submit_answer(user, quiz_index, answer)`: Users participate and earn points.
+- `get_score(user)`: Query on-chain user performance.
 
 ---
-
-## 🧠 How It Works
-
-1. The contract is deployed and initialized with an admin account.
-2. The admin creates quiz questions with multiple options.
-3. Users retrieve available quizzes.
-4. Users submit their answers.
-5. The smart contract verifies answers and updates scores.
-6. Users can query their scores anytime.
-
----
-
-## 🛠️ Tech Stack
-
-- **Blockchain:** Stellar  
-- **Smart Contracts:** Soroban  
-- **Language:** Rust  
-- **SDK:** soroban-sdk  
-
----
-
-## 📦 Contract Functions
-
-### `initialize(admin: Address)`
-Initializes the contract with an admin.
-
-### `create_quiz(question, options, correct_answer)`
-Allows admin to create a quiz.
-
-### `get_quizzes()`
-Fetches all quizzes.
-
-### `submit_answer(user, quiz_index, answer)`
-Allows a user to submit an answer and updates score.
-
-### `get_score(user)`
-Returns the score of a user.
-
-### `get_admin()`
-Returns the admin address.
-
----
-
-## 🔗 Deployed Smart Contract Link
-🔗 https://stellar.expert/explorer/testnet/tx/de89eae40ef8a4944547fcd38c5a70ecb2e20904f5ef36c1e1640c0d97e08e79
-
-🔗 https://lab.stellar.org/r/testnet/contract/CCZUUOVXLGOL3PEYCDQIXLXFNVL4JTYPYF2HXZ264JPVIIKVHMSNFDUW
-
-
-> ⚠️ Replace with your deployed contract address:
- 
-CCZUUOVXLGOL3PEYCDQIXLXFNVL4JTYPYF2HXZ264JPVIIKVHMSNFDUW
-
-<img width="1680" height="1050" alt="Screenshot 2026-03-19 at 2 08 28 PM" src="https://github.com/user-attachments/assets/6c8e649e-af6e-4be3-a039-6baa98cb5c00" />
+Built for the Stellar Soroban Challenge.
