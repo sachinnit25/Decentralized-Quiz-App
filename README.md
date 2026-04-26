@@ -78,3 +78,5 @@ The project includes a comprehensive test suite in `src/test.rs` covering:
 
 ---
 Built for the Stellar Soroban Challenge.
+
+// Project finalized and deployed to Vercel.
