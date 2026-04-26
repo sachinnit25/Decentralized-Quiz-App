@@ -104,3 +104,6 @@ impl DecentralizedQuizApp {
         env.storage().instance().get(&ADMIN).unwrap()
     }
 }
+
+mod test;
+
